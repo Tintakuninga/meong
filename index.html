@@ -33,6 +33,7 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; transition: var(--transition); }
+        
         .header-actions { position: absolute; top: 20px; right: 20px; }
         .theme-toggle { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; box-shadow: var(--shadow); transition: var(--transition); }
         .theme-toggle:hover { transform: scale(1.05); }
@@ -44,9 +45,15 @@
         .badge-regional { display: inline-block; background-color: #ede9fe; color: #5b21b6; font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: 600; margin: 0 auto 25px auto; text-align: center; width: 100%; letter-spacing: 0.5px;}
         [data-theme="dark"] .badge-regional { background-color: #4c1d95; color: #ddd6fe; }
 
-        .input-group { margin-bottom: 20px; }
-        input { width: 100%; padding: 14px 16px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 16px; background-color: var(--bg-color); color: var(--text-main); transition: var(--transition); letter-spacing: 2px; text-align: center; font-weight: 600; }
+        .input-group { position: relative; margin-bottom: 20px; }
+        input { width: 100%; padding: 14px 40px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 16px; background-color: var(--bg-color); color: var(--text-main); transition: var(--transition); letter-spacing: 2px; text-align: center; font-weight: 600; }
         input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2); }
+        
+        /* Tombol Clear (X) */
+        .btn-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; display: none; padding: 5px; border-radius: 50%; transition: var(--transition); }
+        .btn-clear:hover { color: #ef4444; background-color: rgba(239, 68, 68, 0.1); }
+        .btn-clear svg { width: 20px; height: 20px; }
+
         button.btn-submit { width: 100%; background-color: var(--primary); color: white; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: var(--transition); }
         button.btn-submit:hover { background-color: var(--primary-hover); }
         
@@ -76,11 +83,16 @@
     <div class="container">
         <h2>Validasi Data NIK</h2>
         <p class="subtitle">Ekstraksi Offline & Akurat</p>
-        <div class="badge-regional">Regional: Khusus Sulawesi Selatan (73)</div>
+        <div class="badge-regional">Regional: Khusus Sulawesi Selatan</div>
         
         <div class="input-group">
-            <!-- Mencegah input selain angka saat mengetik -->
-            <input type="text" id="nikInput" placeholder="Masukkan 16 Digit NIK" maxlength="16" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            <!-- maxlength dihapus agar copy-paste angka berspasi tidak terpotong prematurely -->
+            <input type="text" id="nikInput" placeholder="Masukkan 16 Digit NIK" oninput="formatInput(this)">
+            
+            <!-- Tombol X -->
+            <button class="btn-clear" id="btnClear" onclick="clearInput()" title="Hapus NIK">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
         </div>
         
         <button class="btn-submit" onclick="cekNIK()">Analisis Data (Instan)</button>
@@ -128,6 +140,27 @@
             }
         };
 
+        // Format Input & Tampilkan Tombol X
+        function formatInput(el) {
+            // Hilangkan semua karakter selain angka (termasuk spasi)
+            let val = el.value.replace(/\D/g, '');
+            // Potong menjadi maksimal 16 digit
+            el.value = val.substring(0, 16);
+            
+            // Tampilkan tombol X jika ada teks, sembunyikan jika kosong
+            document.getElementById('btnClear').style.display = el.value.length > 0 ? 'block' : 'none';
+        }
+
+        // Fungsi Hapus Input (Tombol X)
+        function clearInput() {
+            const input = document.getElementById('nikInput');
+            input.value = '';
+            document.getElementById('btnClear').style.display = 'none';
+            document.getElementById('resultCard').style.display = 'none';
+            document.getElementById('errorMsg').style.display = 'none';
+            input.focus(); // Kembalikan kursor ke input
+        }
+
         const dbSulsel = {
             "7301": { "nama": "KABUPATEN KEPULAUAN SELAYAR", "kec": {"01":"BENTENG", "02":"BONTOMATENE", "03":"BONTOMANAI", "04":"BONTOSIKUYU", "05":"BONTOHARU", "06":"PASIMARANNU", "07":"PASILAMBENA", "08":"PASIMASUNGGU", "09":"PASIMASUNGGU TIMUR", "10":"BONTOSOMBA", "11":"TAKABONERATE"} },
             "7302": { "nama": "KABUPATEN BULUKUMBA", "kec": {"01":"GANTARANG", "02":"UJUNG BULU", "03":"BONTOBAHARI", "04":"BONTO TIRO", "05":"HERLANG", "06":"KAJANG", "07":"BULUKUMPA", "08":"KINDANG", "09":"UJUNG LOE", "10":"RILAU ALE"} },
@@ -163,7 +196,7 @@
             resultCard.style.display = 'none';
             errorMsg.style.display = 'none';
 
-            // VALIDASI INPUT KETAT: Harus 16 digit dan HANYA angka
+            // VALIDASI INPUT: Harus 16 digit angka (Spasi sudah dihilangkan oleh formatInput)
             if(!/^\d{16}$/.test(nik)) {
                 errorMsg.style.display = 'block';
                 return;
@@ -177,7 +210,6 @@
             const bulanLahir = nik.substring(8, 10);
             const tahunLahir = parseInt(nik.substring(10, 12));
 
-            // Validasi Khusus Sulsel
             if (kodeProv !== "73") {
                 errorMsg.innerText = "Alat ini khusus untuk NIK Provinsi Sulawesi Selatan (Awalan 73).";
                 errorMsg.style.display = 'block';
@@ -186,11 +218,9 @@
 
             let namaKab = "Tidak ditemukan", namaKec = "Tidak ditemukan", tempatLahir = "Tidak diketahui";
 
-            // Pencarian Data Wilayah
             const dataDaerah = dbSulsel[kodeKab];
             if (dataDaerah) {
                 namaKab = dataDaerah.nama;
-                // Menghilangkan kata "KOTA " atau "KABUPATEN " untuk nama tempat lahir
                 tempatLahir = namaKab.replace(/^(KABUPATEN|KOTA)\s/, '');
                 
                 if (dataDaerah.kec[kodeKec]) {
@@ -200,42 +230,35 @@
                 }
             }
 
-            // Logika Jenis Kelamin
             let gender = 'Laki-laki';
             if (tanggalLahir > 40) {
                 gender = 'Perempuan';
                 tanggalLahir = tanggalLahir - 40;
             }
 
-            // Hitung Tahun Lahir Penuh
             const tahunSekarang = new Date().getFullYear() % 100;
             let tahunPenuh = (tahunLahir <= tahunSekarang) ? 2000 + tahunLahir : 1900 + tahunLahir;
 
-            // ==========================================
-            // LOGIKA SEJARAH: MAKASSAR -> UJUNG PANDANG
-            // ==========================================
+            // LOGIKA UJUNG PANDANG
             if (tempatLahir === "MAKASSAR") {
-                // Di JavaScript, bulan dimulai dari index 0 (0 = Jan, 9 = Okt)
                 const tglLahirObj = new Date(tahunPenuh, parseInt(bulanLahir) - 1, tanggalLahir);
-                const batasUjungPandang = new Date(1999, 9, 13); // 13 Oktober 1999
+                const batasUjungPandang = new Date(1999, 9, 13); 
                 
                 if (tglLahirObj < batasUjungPandang) {
                     tempatLahir = "UJUNG PANDANG";
                 }
             }
-            // ==========================================
 
             const formatTanggal = tanggalLahir.toString().padStart(2, '0');
             const formatBulan = getNamaBulan(bulanLahir);
 
-            // Render Output
-            document.getElementById('resProvinsi').innerText = `SULAWESI SELATAN (Kode: 73)`;
-            document.getElementById('resKabupaten').innerText = `${namaKab} (Kode: ${kodeKab})`;
-            document.getElementById('resKecamatan').innerText = `${namaKec} (Kode: ${kodeProv}${kodeKab.substring(2,4)}${kodeKec})`;
+            // RENDER OUTPUT BERSIH (Tanpa tulisan "Kode: ...")
+            document.getElementById('resProvinsi').innerText = `SULAWESI SELATAN`;
+            document.getElementById('resKabupaten').innerText = namaKab;
+            document.getElementById('resKecamatan').innerText = namaKec;
             document.getElementById('resGender').innerText = gender;
             document.getElementById('resTTL').innerText = `${tempatLahir}, ${formatTanggal} ${formatBulan} ${tahunPenuh}`;
 
-            // Tampilkan Hasil
             resultCard.style.display = 'block';
         }
 

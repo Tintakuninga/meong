@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pengecek Data NIK</title>
+    <title>Pengecek Data</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -13,7 +13,7 @@
             --card-bg: #ffffff;
             --text-main: #1f2937;
             --text-muted: #6b7280;
-            --primary: #8b5cf6; /* Warna ungu khusus edisi regional */
+            --primary: #8b5cf6;
             --primary-hover: #7c3aed;
             --border-color: #e5e7eb;
             --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -79,11 +79,12 @@
         <div class="badge-regional">Regional: Khusus Sulawesi Selatan (73)</div>
         
         <div class="input-group">
+            <!-- Mencegah input selain angka saat mengetik -->
             <input type="text" id="nikInput" placeholder="Masukkan 16 Digit NIK" maxlength="16" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
         </div>
         
         <button class="btn-submit" onclick="cekNIK()">Analisis Data (Instan)</button>
-        <div class="error-msg" id="errorMsg">NIK harus terdiri dari 16 digit angka valid.</div>
+        <div class="error-msg" id="errorMsg">Mohon masukkan tepat 16 digit NIK (Hanya Angka).</div>
 
         <div class="result-card" id="resultCard">
             <div class="result-item">
@@ -127,23 +128,22 @@
             }
         };
 
-        // Database Lokal (Sangat Ringan): Hanya untuk Kode 73 (Sulawesi Selatan)
         const dbSulsel = {
             "7301": { "nama": "KABUPATEN KEPULAUAN SELAYAR", "kec": {"01":"BENTENG", "02":"BONTOMATENE", "03":"BONTOMANAI", "04":"BONTOSIKUYU", "05":"BONTOHARU", "06":"PASIMARANNU", "07":"PASILAMBENA", "08":"PASIMASUNGGU", "09":"PASIMASUNGGU TIMUR", "10":"BONTOSOMBA", "11":"TAKABONERATE"} },
-            "7302": { "nama": "KABUPATEN BULUKUMBA", "kec": {"01":"GANTARANG", "02":"UJUNG BULU", "03":"BONTobahari", "04":"BONTO TIRO", "05":"HERLANG", "06":"KAJANG", "07":"BULUKUMPA", "08":"KINDANG", "09":"UJUNG LOE", "10":"RILAU ALE"} },
+            "7302": { "nama": "KABUPATEN BULUKUMBA", "kec": {"01":"GANTARANG", "02":"UJUNG BULU", "03":"BONTOBAHARI", "04":"BONTO TIRO", "05":"HERLANG", "06":"KAJANG", "07":"BULUKUMPA", "08":"KINDANG", "09":"UJUNG LOE", "10":"RILAU ALE"} },
             "7303": { "nama": "KABUPATEN BANTAENG", "kec": {"01":"BISAPPU", "02":"BANTAENG", "03":"EREMERASA", "04":"TOMPOBULU", "05":"PA'JUKUKANG", "06":"ULUERE", "07":"GANTARANGKEKE", "08":"SINOA"} },
             "7304": { "nama": "KABUPATEN JENEPONTO", "kec": {"01":"BANGKALA", "02":"TAMALATEA", "03":"BINAMU", "04":"BATANG", "05":"KELARA", "06":"BANGKALA BARAT", "07":"BONTORAMBA", "08":"TURATEA", "09":"ARUNGKEKE", "10":"RUMBIA", "11":"TAROWANG"} },
             "7305": { "nama": "KABUPATEN TAKALAR", "kec": {"01":"MAPPAKASUNGGU", "02":"MANGARABOMBANG", "03":"POLOMBANGKENG SELATAN", "04":"POLOMBANGKENG UTARA", "05":"GALESONG SELATAN", "06":"GALESONG UTARA", "07":"PATTALLASSANG", "08":"SANROBONE", "09":"GALESONG", "10":"KEPULAUAN TANAKEKE"} },
-            "7306": { "nama": "KABUPATEN GOWA", "kec": {"01":"BONTONOMPO", "02":"BAJENG", "03":"PALLANGGA", "04":"SOMBA OPU", "05":"TINGGIMONCONG", "06":"PARANGLOE", "07":"BONTOMARANNU", "08":"PALANGGA", "09":"BUNGMaya", "10":"TOMPOBULU", "11":"TAROWANG", "12":"BIRINGBULU", "13":"BAROMBONG", "14":"PATALLASSANG", "15":"MANUJU", "16":"BONTOLempangan", "17":"TOMBOBulu", "18":"PARIGI", "19":"BAJENG BARAT"} },
+            "7306": { "nama": "KABUPATEN GOWA", "kec": {"01":"BONTONOMPO", "02":"BAJENG", "03":"PALLANGGA", "04":"SOMBA OPU", "05":"TINGGIMONCONG", "06":"PARANGLOE", "07":"BONTOMARANNU", "08":"PALANGGA", "09":"BUNGMAYA", "10":"TOMPOBULU", "11":"TAROWANG", "12":"BIRINGBULU", "13":"BAROMBONG", "14":"PATALLASSANG", "15":"MANUJU", "16":"BONTOLEMPANGAN", "17":"TOMBOBULU", "18":"PARIGI", "19":"BAJENG BARAT"} },
             "7307": { "nama": "KABUPATEN SINJAI", "kec": {"01":"SINJAI BARAT", "02":"SINJAI SELATAN", "03":"SINJAI TIMUR", "04":"SINJAI TENGAH", "05":"SINJAI UTARA", "06":"BULUPODDO", "07":"SINJAI BORONG", "08":"TELLU LIMPOE", "09":"PULAU SEMBILAN"} },
             "7308": { "nama": "KABUPATEN MAROS", "kec": {"01":"MANDAI", "02":"BANTIMURUNG", "03":"MAROS BARU", "04":"BONTOA", "05":"TANRALILI", "06":"MARUSU", "07":"SIMBANG", "08":"CENRANA", "09":"TOMPOBULU", "10":"LAU", "11":"MONCONGLOE", "12":"TURIKALE", "13":"MALLAWA"} },
-            "7309": { "nama": "KABUPATEN PANGKAJENE KEPULAUAN", "kec": {"01":"LIUKANG TANGAYA", "02":"LIUKANG KALMAS", "03":"LIUKANG TUPABBIRING", "04":"PANGKAJENE", "05":"BALOCCI", "06":"BUNGORO", "07":"LABAKKANG", "08":"MA'RANG", "09":"SEGERI", "10":"MINASATENE", "11":"MANDALLE", "12":"Tondong Tallasa", "13":"LIUKANG TUPABBIRING UTARA"} },
+            "7309": { "nama": "KABUPATEN PANGKAJENE KEPULAUAN", "kec": {"01":"LIUKANG TANGAYA", "02":"LIUKANG KALMAS", "03":"LIUKANG TUPABBIRING", "04":"PANGKAJENE", "05":"BALOCCI", "06":"BUNGORO", "07":"LABAKKANG", "08":"MA'RANG", "09":"SEGERI", "10":"MINASATENE", "11":"MANDALLE", "12":"TONDONG TALLASA", "13":"LIUKANG TUPABBIRING UTARA"} },
             "7310": { "nama": "KABUPATEN BARRU", "kec": {"01":"TANETE RIAJA", "02":"TANETE RILAU", "03":"BARRU", "04":"SOPPENG RIAJA", "05":"MALLUSETASI", "06":"PUJANANTING", "07":"BALUSU"} },
-            "7311": { "nama": "KABUPATEN BONE", "kec": {"01":"BONTocani", "02":"KAHU", "03":"KAJUARA", "04":"SALOMEKKO", "05":"TONRA", "06":"PATIMPENG", "07":"PONRE", "08":"MARE", "09":"SIBULUE", "10":"BAREBBO", "11":"CINA", "12":"PONRE", "13":"LAPPARIAJA", "14":"TELLULIMPOE", "15":"BENGO", "16":"ULAWENG", "17":"PALAKKA", "18":"AWANGPONE", "19":"TELLU SIATTINGE", "20":"AMALI", "21":"AJANGALE", "22":"DUA BOCCOE", "23":"CENRANA", "24":"TANETE RIATTANG BARAT", "25":"TANETE RIATTANG", "26":"TANETE RIATTANG TIMUR", "27":"AMALI"} },
+            "7311": { "nama": "KABUPATEN BONE", "kec": {"01":"BONTOCANI", "02":"KAHU", "03":"KAJUARA", "04":"SALOMEKKO", "05":"TONRA", "06":"PATIMPENG", "07":"PONRE", "08":"MARE", "09":"SIBULUE", "10":"BAREBBO", "11":"CINA", "12":"PONRE", "13":"LAPPARIAJA", "14":"TELLULIMPOE", "15":"BENGO", "16":"ULAWENG", "17":"PALAKKA", "18":"AWANGPONE", "19":"TELLU SIATTINGE", "20":"AMALI", "21":"AJANGALE", "22":"DUA BOCCOE", "23":"CENRANA", "24":"TANETE RIATTANG BARAT", "25":"TANETE RIATTANG", "26":"TANETE RIATTANG TIMUR"} },
             "7312": { "nama": "KABUPATEN SOPPENG", "kec": {"01":"MARIORIWAWO", "02":"LILIRIAJA", "03":"LILIRILAU", "04":"LALABATA", "05":"MARIORIAWA", "06":"DONRI DONRI", "07":"GANRA", "08":"CITTA"} },
             "7313": { "nama": "KABUPATEN WAJO", "kec": {"01":"SABANGPARU", "02":"PAMMANA", "03":"TAKKALALLA", "04":"SAJOANGING", "05":"PITUMPANUA", "06":"BOLA", "07":"PENRANG", "08":"TANA SITOLO", "09":"BELAWA", "10":"MANIANGPAJO", "11":"TEMPE", "12":"KEERA", "13":"GILIRENG"} },
             "7314": { "nama": "KABUPATEN SIDENRENG RAPPANG", "kec": {"01":"PANCA LAUTANG", "02":"TELLU LIMPOE", "03":"WATANG PULU", "04":"BARANTI", "05":"PANCA RIJANG", "06":"KULO", "07":"MARITENGNGAE", "08":"WATANG SIDENRENG", "09":"PITU RIAWA", "10":"DUA PITUE", "11":"PITU RIASE"} },
-            "7315": { "nama": "KABUPATEN PINRANG", "kec": {"01":"MATIRO SOMPE", "02":"SUPPA", "03":"MATTIRO BULU", "04":"WATANG SAWITTO", "05":"PATAMPANUA", "06":"DUAMPANUA", "07":"LEMBANG", "08":"CEMPA", "09":"TIROANG", "10":"LANRISANG", "11":"PALETEANG", "12":"BATU Lappa"} },
+            "7315": { "nama": "KABUPATEN PINRANG", "kec": {"01":"MATIRO SOMPE", "02":"SUPPA", "03":"MATTIRO BULU", "04":"WATANG SAWITTO", "05":"PATAMPANUA", "06":"DUAMPANUA", "07":"LEMBANG", "08":"CEMPA", "09":"TIROANG", "10":"LANRISANG", "11":"PALETEANG", "12":"BATU LAPPA"} },
             "7316": { "nama": "KABUPATEN ENREKANG", "kec": {"01":"MAIWA", "02":"ENREKANG", "03":"BARAKA", "04":"ANGGERAJA", "05":"ALLA", "06":"BUNGIN", "07":"CENDANA", "08":"CURIO", "09":"MALUA", "10":"BUNTU BATU", "11":"BAROKO", "12":"MASALLE"} },
             "7317": { "nama": "KABUPATEN LUWU", "kec": {"01":"BASSESANGTEMPE", "02":"LAROMPONG", "03":"SULI", "04":"BAJO", "05":"BELOPA", "06":"WALENRANG", "07":"BELOPA UTARA", "08":"KAMANRE", "09":"LATIMOJONG", "10":"BAJO BARAT", "11":"SULI BARAT", "12":"LAROMPONG SELATAN", "13":"PONRANG", "14":"BUA", "15":"WALENRANG UTARA", "16":"BUPON", "17":"BASSESANGTEMPE UTARA", "18":"WALENRANG TIMUR", "19":"WALENRANG BARAT", "20":"LAMASI", "21":"LAMASI TIMUR", "22":"PONRANG SELATAN"} },
             "7318": { "nama": "KABUPATEN TANA TORAJA", "kec": {"01":"BONGGAKARADENG", "02":"SIMBUANG", "03":"RANO", "04":"MAPPAK", "05":"MENGKENDEK", "06":"SANGALLA", "07":"GANDANG BATU SILLANAN", "08":"MAKALE", "09":"SANGALLA SELATAN", "10":"SANGALLA UTARA", "11":"MAKALE SELATAN", "12":"BATUALU", "13":"MAKALE UTARA", "14":"SALUPUTI", "15":"BITTUANG", "16":"REMBO", "17":"MALIMBONG BALEPE", "18":"RANTETAYO", "19":"KURRA"} },
@@ -163,15 +163,15 @@
             resultCard.style.display = 'none';
             errorMsg.style.display = 'none';
 
-            if(nik.length !== 16 || isNaN(nik)) {
-                errorMsg.innerText = "Mohon masukkan 16 digit NIK yang valid.";
+            // VALIDASI INPUT KETAT: Harus 16 digit dan HANYA angka
+            if(!/^\d{16}$/.test(nik)) {
                 errorMsg.style.display = 'block';
                 return;
             }
 
             const kodeProv = nik.substring(0, 2);
-            const kodeKab = nik.substring(0, 4); // Format: 7371
-            const kodeKec = nik.substring(4, 6); // Format: 10
+            const kodeKab = nik.substring(0, 4);
+            const kodeKec = nik.substring(4, 6);
             
             let tanggalLahir = parseInt(nik.substring(6, 8));
             const bulanLahir = nik.substring(8, 10);
@@ -186,17 +186,16 @@
 
             let namaKab = "Tidak ditemukan", namaKec = "Tidak ditemukan", tempatLahir = "Tidak diketahui";
 
-            // Pencarian Data
+            // Pencarian Data Wilayah
             const dataDaerah = dbSulsel[kodeKab];
             if (dataDaerah) {
                 namaKab = dataDaerah.nama;
+                // Menghilangkan kata "KOTA " atau "KABUPATEN " untuk nama tempat lahir
                 tempatLahir = namaKab.replace(/^(KABUPATEN|KOTA)\s/, '');
                 
-                // Cari Kecamatan
                 if (dataDaerah.kec[kodeKec]) {
                     namaKec = dataDaerah.kec[kodeKec];
                 } else if (kodeKec === "10" && kodeKab === "7371") {
-                   // Fallback khusus jika typo di penamaan db
                    namaKec = "PANAKKUKANG";
                 }
             }
@@ -208,8 +207,23 @@
                 tanggalLahir = tanggalLahir - 40;
             }
 
+            // Hitung Tahun Lahir Penuh
             const tahunSekarang = new Date().getFullYear() % 100;
             let tahunPenuh = (tahunLahir <= tahunSekarang) ? 2000 + tahunLahir : 1900 + tahunLahir;
+
+            // ==========================================
+            // LOGIKA SEJARAH: MAKASSAR -> UJUNG PANDANG
+            // ==========================================
+            if (tempatLahir === "MAKASSAR") {
+                // Di JavaScript, bulan dimulai dari index 0 (0 = Jan, 9 = Okt)
+                const tglLahirObj = new Date(tahunPenuh, parseInt(bulanLahir) - 1, tanggalLahir);
+                const batasUjungPandang = new Date(1999, 9, 13); // 13 Oktober 1999
+                
+                if (tglLahirObj < batasUjungPandang) {
+                    tempatLahir = "UJUNG PANDANG";
+                }
+            }
+            // ==========================================
 
             const formatTanggal = tanggalLahir.toString().padStart(2, '0');
             const formatBulan = getNamaBulan(bulanLahir);
@@ -221,7 +235,7 @@
             document.getElementById('resGender').innerText = gender;
             document.getElementById('resTTL').innerText = `${tempatLahir}, ${formatTanggal} ${formatBulan} ${tahunPenuh}`;
 
-            // Tampilkan Hasil (Animasi)
+            // Tampilkan Hasil
             resultCard.style.display = 'block';
         }
 

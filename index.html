@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengecek Data NIK Modern</title>
+    <!-- Menghubungkan favicon dari local storage sesuai permintaan -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --border-color: #e5e7eb;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #111827;
+            --card-bg: #1f2937;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --primary: #3b82f6;
+            --primary-hover: #60a5fa;
+            --border-color: #374151;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        .header-actions {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        .theme-toggle svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 450px;
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+        }
+
+        h2 {
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 16px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            transition: var(--transition);
+            letter-spacing: 2px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        button.btn-submit {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        button.btn-submit:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .result-card {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .result-item {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        
+        .result-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .error-msg {
+            color: #ef4444;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Ikon SVG untuk Tema */
+        #icon-sun { display: none; }
+        #icon-moon { display: block; }
+        [data-theme="dark"] #icon-sun { display: block; fill: currentColor;}
+        [data-theme="dark"] #icon-moon { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- Tombol Tema -->
+    <div class="header-actions">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Dark Mode">
+            <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        </button>
+    </div>
+
+    <div class="container">
+        <h2>Ekstraksi NIK</h2>
+        <p class="subtitle">Validasi dan baca data KTP elektronik</p>
+        
+        <div class="input-group">
+            <input type="text" id="nikInput" placeholder="Masukkan 16 Digit NIK" maxlength="16" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+        </div>
+        
+        <button class="btn-submit" onclick="cekNIK()">Analisis Data</button>
+        <div class="error-msg" id="errorMsg">NIK harus terdiri dari 16 digit angka valid.</div>
+
+        <div class="result-card" id="resultCard">
+            <div class="result-item">
+                <div class="result-label">Provinsi</div>
+                <div class="result-value" id="resProvinsi">-</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Kota / Kabupaten</div>
+                <div class="result-value" id="resKabupaten">-</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Jenis Kelamin</div>
+                <div class="result-value" id="resGender">-</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Tempat, Tanggal Lahir</div>
+                <div class="result-value" id="resTTL">-</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Kecamatan (Kode) & No. Urut</div>
+                <div class="result-value" id="resDetail">-</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database Sederhana Provinsi & Referensi Kabupaten (Sampel representatif)
+        // Catatan: Untuk database penuh 7000+ kecamatan dibutuhkan API eksternal. 
+        // Ini adalah pemetaan kodifikasi wilayah BPS/Kemendagri level Provinsi.
+        const dbWilayah = {
+            "11": { nama: "ACEH" },
+            "12": { nama: "SUMATERA UTARA" },
+            "13": { nama: "SUMATERA BARAT" },
+            "14": { nama: "RIAU" },
+            "15": { nama: "JAMBI" },
+            "16": { nama: "SUMATERA SELATAN" },
+            "17": { nama: "BENGKULU" },
+            "18": { nama: "LAMPUNG" },
+            "19": { nama: "KEPULAUAN BANGKA BELITUNG" },
+            "21": { nama: "KEPULAUAN RIAU" },
+            "31": { nama: "DKI JAKARTA" },
+            "32": { nama: "JAWA BARAT" },
+            "33": { nama: "JAWA TENGAH" },
+            "34": { nama: "DI YOGYAKARTA" },
+            "35": { nama: "JAWA TIMUR" },
+            "36": { nama: "BANTEN" },
+            "51": { nama: "BALI" },
+            "52": { nama: "NUSA TENGGARA BARAT" },
+            "53": { nama: "NUSA TENGGARA TIMUR" },
+            "61": { nama: "KALIMANTAN BARAT" },
+            "62": { nama: "KALIMANTAN TENGAH" },
+            "63": { nama: "KALIMANTAN SELATAN" },
+            "64": { nama: "KALIMANTAN TIMUR" },
+            "65": { nama: "KALIMANTAN UTARA" },
+            "71": { nama: "SULAWESI UTARA" },
+            "72": { nama: "SULAWESI TENGAH" },
+            "73": { nama: "SULAWESI SELATAN" },
+            "74": { nama: "SULAWESI TENGGARA" },
+            "75": { nama: "GORONTALO" },
+            "76": { nama: "SULAWESI BARAT" },
+            "81": { nama: "MALUKU" },
+            "82": { nama: "MALUKU UTARA" },
+            "91": { nama: "PAPUA BARAT" },
+            "94": { nama: "PAPUA" }
+        };
+
+        // Fungsi Toggle Dark/Light Mode
+        function toggleTheme() {
+            const htmlNode = document.documentElement;
+            const currentTheme = htmlNode.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            htmlNode.setAttribute('data-theme', newTheme);
+            
+            // Simpan preferensi tema di LocalStorage
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Cek preferensi tema saat halaman dimuat
+        window.onload = () => {
+            const savedTheme = localStorage.getItem('theme');
+            if(savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        };
+
+        // Fungsi Ekstraksi NIK
+        function cekNIK() {
+            const nik = document.getElementById('nikInput').value;
+            const resultCard = document.getElementById('resultCard');
+            const errorMsg = document.getElementById('errorMsg');
+            
+            // Reset tampilan
+            resultCard.style.display = 'none';
+            errorMsg.style.display = 'none';
+
+            if(nik.length !== 16 || isNaN(nik)) {
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // Memecah kode NIK
+            const kodeProvinsi = nik.substring(0, 2);
+            const kodeKabKota = nik.substring(2, 4);
+            const kodeKecamatan = nik.substring(4, 6);
+            let tanggalLahir = parseInt(nik.substring(6, 8));
+            const bulanLahir = nik.substring(8, 10);
+            const tahunLahir = nik.substring(10, 12);
+            const noUrut = nik.substring(12, 16);
+
+            // Logika Wilayah & Tempat Lahir
+            let namaProvinsi = dbWilayah[kodeProvinsi] ? dbWilayah[kodeProvinsi].nama : "Kode Provinsi Tidak Dikenal";
+            
+            // Menentukan Kabupaten/Kota berdasarkan angka (Digit ke 3 & 4)
+            // Rumus umum: Jika digit pertama kab/kota > 7 (yaitu 71, 72, dst) biasanya adalah 'KOTA', jika dibawah itu adalah 'KABUPATEN'
+            let jenisWilayah = parseInt(kodeKabKota) >= 71 ? "KOTA" : "KABUPATEN";
+            let namaKabKota = `${jenisWilayah} KODE ${kodeKabKota}`; 
+            
+            // Untuk Tempat Lahir, biasanya diambil dari Kota/Kabupaten tempat KTP diterbitkan
+            let tempatLahir = `KODE WILAYAH ${kodeProvinsi}${kodeKabKota}`;
+            if(dbWilayah[kodeProvinsi]) {
+                // Estimasi tempat lahir (Karena database 500+ kota terlalu besar untuk client-side tanpa API)
+                tempatLahir = `${namaProvinsi} (${jenisWilayah})`;
+            }
+
+            // Logika Jenis Kelamin & Tanggal
+            let gender = 'Laki-laki';
+            if (tanggalLahir > 40) {
+                gender = 'Perempuan';
+                tanggalLahir = tanggalLahir - 40;
+            }
+
+            // Logika Tahun
+            // Jika tahun < 30, kemungkinan besar tahun 2000-an (KTP elektronik dibuat mulai ~2011). 
+            // Jika > 30, kemungkinan 1900-an.
+            const tahunPenuh = (parseInt(tahunLahir) < 30) ? '20' + tahunLahir : '19' + tahunLahir;
+            
+            // Format String
+            const formatTanggal = tanggalLahir.toString().padStart(2, '0');
+            const formatBulan = namaBulan(bulanLahir);
+
+            // Output DOM
+            document.getElementById('resProvinsi').innerText = `${namaProvinsi} (${kodeProvinsi})`;
+            document.getElementById('resKabupaten').innerText = `${namaKabKota}`;
+            document.getElementById('resGender').innerText = gender;
+            
+            // Menampilkan Tempat, Tanggal Lahir
+            document.getElementById('resTTL').innerText = `${tempatLahir}, ${formatTanggal} ${formatBulan} ${tahunPenuh}`;
+            
+            document.getElementById('resDetail').innerText = `Kecamatan: ${kodeKecamatan} | No Urut: ${noUrut}`;
+
+            resultCard.style.display = 'block';
+        }
+
+        // Helper untuk Bulan
+        function namaBulan(kode) {
+            const bulan = {
+                "01": "Januari", "02": "Februari", "03": "Maret", "04": "April",
+                "05": "Mei", "06": "Juni", "07": "Juli", "08": "Agustus",
+                "09": "September", "10": "Oktober", "11": "November", "12": "Desember"
+            };
+            return bulan[kode] || kode;
+        }
+    </script>
+</body>
+</html>

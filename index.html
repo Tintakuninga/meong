@@ -81,7 +81,10 @@
     </div>
 
     <div class="container">
-        <h2>Validasi Data</h2>        
+        <h2>Validasi Data</h2>
+        <p class="subtitle">Ekstraksi Offline & Akurat</p>
+        <div class="badge-regional">Regional: Khusus Sulawesi Selatan</div>
+        
         <div class="input-group">
             <!-- maxlength dihapus agar copy-paste angka berspasi tidak terpotong prematurely -->
             <input type="text" id="nikInput" placeholder="Masukkan 16 Digit NIK" oninput="formatInput(this)">
@@ -92,7 +95,7 @@
             </button>
         </div>
         
-        <button class="btn-submit" onclick="cekNIK()">Analisis Data (Instan)</button>
+        <button class="btn-submit" onclick="cekNIK()">Analisis Data</button>
         <div class="error-msg" id="errorMsg">Mohon masukkan tepat 16 digit NIK (Hanya Angka).</div>
 
         <div class="result-card" id="resultCard">

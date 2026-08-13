@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pengecek Data NIK Modern</title>
-    <!-- Menghubungkan favicon dari local storage -->
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -32,191 +31,32 @@
             --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            transition: var(--transition);
-        }
-
-        .header-actions {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
-
-        .theme-toggle {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 45px;
-            height: 45px;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-        }
-
-        .theme-toggle:hover {
-            transform: scale(1.05);
-        }
-
-        .theme-toggle svg {
-            width: 24px;
-            height: 24px;
-        }
-
-        .container {
-            background-color: var(--card-bg);
-            padding: 40px 30px;
-            border-radius: 16px;
-            box-shadow: var(--shadow);
-            width: 100%;
-            max-width: 450px;
-            transition: var(--transition);
-            border: 1px solid var(--border-color);
-        }
-
-        h2 {
-            text-align: center;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: var(--text-main);
-        }
-
-        p.subtitle {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 25px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            font-size: 16px;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            transition: var(--transition);
-            letter-spacing: 2px;
-            text-align: center;
-            font-weight: 600;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-        }
-
-        button.btn-submit {
-            width: 100%;
-            background-color: var(--primary);
-            color: white;
-            padding: 14px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-        }
-
-        button.btn-submit:hover:not(:disabled) {
-            background-color: var(--primary-hover);
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; transition: var(--transition); }
+        .header-actions { position: absolute; top: 20px; right: 20px; }
+        .theme-toggle { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; box-shadow: var(--shadow); transition: var(--transition); }
+        .theme-toggle:hover { transform: scale(1.05); }
+        .theme-toggle svg { width: 24px; height: 24px; }
+        .container { background-color: var(--card-bg); padding: 40px 30px; border-radius: 16px; box-shadow: var(--shadow); width: 100%; max-width: 450px; transition: var(--transition); border: 1px solid var(--border-color); }
+        h2 { text-align: center; font-weight: 700; margin-bottom: 8px; color: var(--text-main); }
+        p.subtitle { text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; }
+        .input-group { margin-bottom: 20px; }
+        input { width: 100%; padding: 14px 16px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 16px; background-color: var(--bg-color); color: var(--text-main); transition: var(--transition); letter-spacing: 2px; text-align: center; font-weight: 600; }
+        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        button.btn-submit { width: 100%; background-color: var(--primary); color: white; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: var(--transition); display: flex; justify-content: center; align-items: center; gap: 8px; }
+        button.btn-submit:hover:not(:disabled) { background-color: var(--primary-hover); }
+        button.btn-submit:disabled { background-color: var(--text-muted); cursor: not-allowed; }
         
-        button.btn-submit:disabled {
-            background-color: var(--text-muted);
-            cursor: not-allowed;
-        }
-
-        .loader {
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top: 3px solid white;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: none;
-        }
-
+        .loader { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid white; width: 20px; height: 20px; animation: spin 1s linear infinite; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .result-card {
-            margin-top: 25px;
-            padding: 20px;
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            display: none;
-            animation: fadeIn 0.4s ease-in-out;
-        }
-
-        .result-item {
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px dashed var(--border-color);
-        }
-        
-        .result-item:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
-        }
-
-        .result-label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .result-value {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-main);
-        }
-
-        .error-msg {
-            color: #ef4444;
-            text-align: center;
-            font-size: 0.9rem;
-            margin-top: 10px;
-            display: none;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
+        .result-card { margin-top: 25px; padding: 20px; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; display: none; animation: fadeIn 0.4s ease-in-out; }
+        .result-item { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--border-color); }
+        .result-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .result-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .result-value { font-size: 1rem; font-weight: 600; color: var(--text-main); }
+        .error-msg { color: #ef4444; text-align: center; font-size: 0.9rem; margin-top: 10px; display: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         #icon-sun { display: none; }
         #icon-moon { display: block; }
         [data-theme="dark"] #icon-sun { display: block; fill: currentColor;}
@@ -271,7 +111,6 @@
     </div>
 
     <script>
-        // Konfigurasi Tema
         function toggleTheme() {
             const htmlNode = document.documentElement;
             const currentTheme = htmlNode.getAttribute('data-theme');
@@ -289,20 +128,6 @@
             }
         };
 
-        // Fungsi Bantuan Fetch API
-        async function fetchWilayah(url, kode) {
-            try {
-                const response = await fetch(url);
-                if (!response.ok) return null;
-                const data = await response.json();
-                return data.find(item => item.id === kode) || null;
-            } catch (error) {
-                console.error("Gagal mengambil data wilayah:", error);
-                return null;
-            }
-        }
-
-        // Fungsi Utama
         async function cekNIK() {
             const nik = document.getElementById('nikInput').value;
             const resultCard = document.getElementById('resultCard');
@@ -320,29 +145,65 @@
                 return;
             }
 
-            // Ubah UI menjadi Loading
             btnProses.disabled = true;
             loader.style.display = 'block';
             btnText.innerText = 'Memproses...';
 
-            // Ekstraksi Kode
             const kodeProv = nik.substring(0, 2);
-            const kodeKab = nik.substring(0, 4); // API EMSIFA menggunakan 4 digit untuk Kab
-            const kodeKec = nik.substring(0, 6); // API EMSIFA menggunakan 6 digit untuk Kec
+            const kodeKab = nik.substring(0, 4);
+            const kodeKec = nik.substring(0, 6);
             
             let tanggalLahir = parseInt(nik.substring(6, 8));
             const bulanLahir = nik.substring(8, 10);
             const tahunLahir = nik.substring(10, 12);
             const noUrut = nik.substring(12, 16);
 
-            // Fetch Data dari API Publik (EMSIFA API)
             const baseUrl = "https://emsifa.github.io/api-wilayah-indonesia/api";
             
-            const dataProvinsi = await fetchWilayah(`${baseUrl}/provinces.json`, kodeProv);
-            const dataKabupaten = await fetchWilayah(`${baseUrl}/regencies/${kodeProv}.json`, kodeKab);
-            const dataKecamatan = dataKabupaten ? await fetchWilayah(`${baseUrl}/districts/${kodeKab}.json`, kodeKec) : null;
+            let namaProv = "Tidak ditemukan", namaKab = "Tidak ditemukan", namaKec = "Tidak ditemukan";
+            let tempatLahir = "Tidak diketahui";
 
-            // Logika Jenis Kelamin & Tanggal Lahir
+            try {
+                // Tarik data Provinsi
+                const resProv = await fetch(`${baseUrl}/provinces.json`);
+                if (resProv.ok) {
+                    const dataProv = await resProv.json();
+                    const prov = dataProv.find(p => p.id === kodeProv);
+                    if (prov) {
+                        namaProv = prov.name;
+                        
+                        // Tarik data Kabupaten jika Provinsi Ketemu
+                        const resKab = await fetch(`${baseUrl}/regencies/${kodeProv}.json`);
+                        if (resKab.ok) {
+                            const dataKab = await resKab.json();
+                            const kab = dataKab.find(k => k.id === kodeKab);
+                            if (kab) {
+                                namaKab = kab.name;
+                                tempatLahir = kab.name.replace(/^(KABUPATEN|KOTA)\s/, ''); // Hapus kata "KABUPATEN" untuk format Tempat Lahir
+                                
+                                // Tarik data Kecamatan jika Kabupaten Ketemu
+                                const resKec = await fetch(`${baseUrl}/districts/${kodeKab}.json`);
+                                if (resKec.ok) {
+                                    const dataKec = await resKec.json();
+                                    
+                                    // LOGIKA BARU: API menggunakan 7 digit, sedangkan NIK 6 digit.
+                                    // Solusi: Cari data yang 'id'-nya DIAWALI oleh 6 digit kode dari input NIK
+                                    const kec = dataKec.find(k => k.id.startsWith(kodeKec));
+                                    if (kec) {
+                                        namaKec = kec.name;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Kesalahan jaringan:", error);
+                errorMsg.innerText = "Gagal terhubung ke API. Pastikan internet aktif.";
+                errorMsg.style.display = 'block';
+            }
+
+            // Logika Jenis Kelamin
             let gender = 'Laki-laki';
             if (tanggalLahir > 40) {
                 gender = 'Perempuan';
@@ -353,21 +214,13 @@
             const formatTanggal = tanggalLahir.toString().padStart(2, '0');
             const formatBulan = getNamaBulan(bulanLahir);
 
-            // Render Hasil ke UI
-            const namaProv = dataProvinsi ? dataProvinsi.name : "Tidak ditemukan";
-            const namaKab = dataKabupaten ? dataKabupaten.name : "Tidak ditemukan";
-            const namaKec = dataKecamatan ? dataKecamatan.name : "Tidak ditemukan";
-            
-            // Tempat lahir diasumsikan di Kabupaten tempat pendaftaran NIK
-            const tempatLahir = dataKabupaten ? dataKabupaten.name.replace(/^(KABUPATEN|KOTA)\s/, '') : "Tidak diketahui";
-
+            // Tampilkan Hasil Akhir
             document.getElementById('resProvinsi').innerText = `${namaProv} (Kode: ${kodeProv})`;
             document.getElementById('resKabupaten').innerText = `${namaKab} (Kode: ${kodeKab})`;
             document.getElementById('resKecamatan').innerText = `${namaKec} (Kode: ${kodeKec})`;
             document.getElementById('resGender').innerText = gender;
             document.getElementById('resTTL').innerText = `${tempatLahir}, ${formatTanggal} ${formatBulan} ${tahunPenuh}`;
 
-            // Kembalikan UI Tombol
             btnProses.disabled = false;
             loader.style.display = 'none';
             btnText.innerText = 'Analisis Data';

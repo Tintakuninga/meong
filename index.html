@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pengecek Data</title>
+    
+    <!-- Link ke file Manifest PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#8b5cf6">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -34,7 +40,15 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; transition: var(--transition); }
         
-        .header-actions { position: absolute; top: 20px; right: 20px; }
+        /* Modifikasi Layout Header Actions (Tombol PWA & Tema) */
+        .header-actions { position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; align-items: center; }
+        
+        .pwa-btn { background-color: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 13px; cursor: pointer; display: none; transition: var(--transition); box-shadow: var(--shadow); }
+        .pwa-btn:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
+        
+        #btnUpdatePWA { background-color: #10b981; } /* Warna hijau untuk tombol update */
+        #btnUpdatePWA:hover { background-color: #059669; }
+
         .theme-toggle { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; box-shadow: var(--shadow); transition: var(--transition); }
         .theme-toggle:hover { transform: scale(1.05); }
         .theme-toggle svg { width: 24px; height: 24px; }
@@ -49,15 +63,10 @@
         input { width: 100%; padding: 14px 45px 14px 20px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 16px; background-color: var(--bg-color); color: var(--text-main); transition: var(--transition); letter-spacing: 2px; text-align: center; font-weight: 600; }
         input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2); }
         
-        /* Desain Umum Tombol di dalam Input */
         .btn-action { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 50%; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
         .btn-action svg { width: 20px; height: 20px; }
-        
-        /* Tombol Paste */
         #btnPaste { display: flex; }
         #btnPaste:hover { color: var(--primary); background-color: rgba(139, 92, 246, 0.1); }
-        
-        /* Tombol Clear / Hapus */
         #btnClear { display: none; }
         #btnClear:hover { color: #ef4444; background-color: rgba(239, 68, 68, 0.1); }
 
@@ -70,7 +79,6 @@
         .result-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
         .result-value { font-size: 1rem; font-weight: 600; color: var(--text-main); }
         
-        /* Modifikasi Notifikasi Error & Link ke Page 2 */
         .error-msg { text-align: center; font-size: 0.95rem; margin-top: 15px; display: none; padding: 10px; border-radius: 8px;}
         .error-msg.invalid { color: #ef4444; }
         .error-msg.redirect { color: var(--text-main); background-color: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); }
@@ -78,7 +86,6 @@
         .btn-link { display: inline-block; margin-top: 10px; padding: 10px 20px; background-color: var(--primary); color: white !important; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; transition: var(--transition); }
         .btn-link:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
 
-        /* Fitur Copy Tempat Lahir */
         .copyable { cursor: pointer; color: var(--text-main); border-bottom: 1px dashed var(--text-main); transition: var(--transition); display: inline-block;}
         .copyable:hover { color: #ff96da; border-bottom-color: #ff96da; }
         
@@ -92,6 +99,10 @@
 <body>
 
     <div class="header-actions">
+        <!-- Tombol PWA -->
+        <button id="btnUpdatePWA" class="pwa-btn">Update App</button>
+        <button id="btnInstallPWA" class="pwa-btn">Install App</button>
+        
         <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Dark Mode">
             <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
             <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
@@ -106,12 +117,10 @@
         <div class="input-group">
             <input type="text" id="nikInput" placeholder="Masukkan 16 Digit NIK" oninput="formatInput(this)">
             
-            <!-- Tombol Paste -->
             <button class="btn-action" id="btnPaste" onclick="pasteNIK()" title="Tempel NIK dari Clipboard">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
             </button>
             
-            <!-- Tombol Clear -->
             <button class="btn-action" id="btnClear" onclick="clearInput()" title="Hapus NIK">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
@@ -119,7 +128,6 @@
         
         <button class="btn-submit" onclick="cekNIK()">Analisis Data</button>
         
-        <!-- Pesan Error / Redirect -->
         <div class="error-msg" id="errorMsg"></div>
 
         <div class="result-card" id="resultCard">
@@ -147,6 +155,69 @@
     </div>
 
     <script>
+        // --- LOGIKA PWA & SERVICE WORKER ---
+        let deferredPrompt;
+        let newWorker;
+        const btnInstallPWA = document.getElementById('btnInstallPWA');
+        const btnUpdatePWA = document.getElementById('btnUpdatePWA');
+
+        // Menangkap event instalasi PWA
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            btnInstallPWA.style.display = 'block'; // Tampilkan tombol instal
+        });
+
+        // Trigger instalasi saat tombol ditekan
+        btnInstallPWA.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    btnInstallPWA.style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        // Sembunyikan tombol jika aplikasi sudah diinstal
+        window.addEventListener('appinstalled', () => {
+            btnInstallPWA.style.display = 'none';
+        });
+
+        // Registrasi Service Worker & Deteksi Update
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    reg.addEventListener('updatefound', () => {
+                        newWorker = reg.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            // Jika ada update baru yang selesai di-install dan siap digunakan
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                btnUpdatePWA.style.display = 'block';
+                            }
+                        });
+                    });
+                }).catch(err => console.error('Service Worker Gagal:', err));
+            });
+
+            // Reload halaman setelah worker baru mengambil alih
+            let refreshing;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                refreshing = true;
+                window.location.reload();
+            });
+        }
+
+        // Trigger Update saat tombol ditekan
+        btnUpdatePWA.addEventListener('click', () => {
+            if (newWorker) {
+                newWorker.postMessage({ action: 'skipWaiting' });
+            }
+        });
+        // --- END LOGIKA PWA ---
+
         function toggleTheme() {
             const htmlNode = document.documentElement;
             const currentTheme = htmlNode.getAttribute('data-theme');
@@ -168,7 +239,6 @@
             let val = el.value.replace(/\D/g, '');
             el.value = val.substring(0, 16);
             
-            // Toggle tombol Clear dan Paste
             if (el.value.length > 0) {
                 document.getElementById('btnClear').style.display = 'flex';
                 document.getElementById('btnPaste').style.display = 'none';
@@ -187,38 +257,29 @@
             input.focus();
         }
         
-        // Fungsi Paste Otomatis
         async function pasteNIK() {
             try {
                 const text = await navigator.clipboard.readText();
                 const input = document.getElementById('nikInput');
                 input.value = text;
                 formatInput(input);
-                
-                if (input.value.length === 16) {
-                    cekNIK();
-                }
+                if (input.value.length === 16) { cekNIK(); }
             } catch (err) {
                 alert("Gagal mengakses Clipboard. Silakan paste manual.");
-                console.error("Error paste: ", err);
             }
         }
 
-        // Fungsi Salin Tempat Lahir
         function copyTempatLahir(text, el) {
             navigator.clipboard.writeText(text).then(() => {
                 const originalText = el.innerText;
                 el.innerText = "Tersalin!";
-                el.style.color = "#60d673"; // Warna hijau saat tersalin
+                el.style.color = "#60d673"; 
                 el.style.borderBottomColor = "transparent";
-                
                 setTimeout(() => {
                     el.innerText = originalText;
                     el.style.color = "";
                     el.style.borderBottomColor = "";
                 }, 1500);
-            }).catch(err => {
-                console.error('Gagal menyalin teks: ', err);
             });
         }
 
@@ -256,7 +317,7 @@
             
             resultCard.style.display = 'none';
             errorMsg.style.display = 'none';
-            errorMsg.className = 'error-msg'; // Reset class
+            errorMsg.className = 'error-msg'; 
 
             if(!/^\d{16}$/.test(nik)) {
                 errorMsg.innerText = "Mohon masukkan tepat 16 digit NIK (Hanya Angka).";
@@ -273,7 +334,6 @@
             const bulanLahir = nik.substring(8, 10);
             const tahunLahir = parseInt(nik.substring(10, 12));
 
-            // Jika bukan Sulsel, arahkan ke Page 2 (nasional.html)
             if (kodeProv !== "73") {
                 errorMsg.innerHTML = `Mendeteksi NIK dari luar Sulawesi Selatan.<br>
                 <a href="nasional.html" class="btn-link">Buka Pengecek NIK Nasional</a>`;
@@ -322,7 +382,6 @@
             document.getElementById('resKecamatan').innerText = namaKec;
             document.getElementById('resGender').innerText = gender;
             
-            // Render TTL dengan Elemen Tempat Lahir yang Bisa Di-Copy
             document.getElementById('resTTL').innerHTML = `<span class="copyable" onclick="copyTempatLahir('${tempatLahir}', this)" title="Klik untuk menyalin Tempat Lahir">${tempatLahir}</span>, ${formatTanggal} ${formatBulan} ${tahunPenuh}`;
 
             resultCard.style.display = 'block';

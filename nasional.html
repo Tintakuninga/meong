@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pengecek NIK Nasional</title>
+    <title>Pengecek Data</title>
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -74,9 +75,9 @@
     </div>
 
     <div class="container">
-        <h2>Validasi Nasional</h2>
+        <h2>Validasi Data</h2>
         <p class="subtitle">Pencarian Database Wilayah Indonesia</p>
-        <div class="badge-national">Database JSON Nasional</div>
+        <div class="badge-national">Database Nasional</div>
         
         <div class="input-group">
             <input type="text" id="nikInput" placeholder="Masukkan 16 Digit NIK" oninput="formatInput(this)">
@@ -204,24 +205,46 @@
             const kabupaten = dataLokasi[1];
             const kecamatan = dataLokasi[2];
 
+            // Logika Jenis Kelamin
             let gender = 'Laki-laki';
             if (tgl > 40) {
                 gender = 'Perempuan';
                 tgl = tgl - 40;
             }
 
+            // Logika Tahun
             const tahunSekarang = new Date().getFullYear() % 100;
             let tahunPenuh = (thn <= tahunSekarang) ? 2000 + thn : 1900 + thn;
 
-            const namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-            const indexBulan = parseInt(bln) - 1;
-            const teksBulan = (indexBulan >= 0 && indexBulan <= 11) ? namaBulan[indexBulan] : bln;
+            // Validasi Kalender (Bulan 1-12 & Tanggal yang Valid)
+            let blnAngka = parseInt(bln);
+            let isValidDate = true;
+            
+            if (blnAngka < 1 || blnAngka > 12 || isNaN(blnAngka)) {
+                isValidDate = false;
+            } else {
+                // Mengecek batas hari dalam bulan tersebut (termasuk tahun kabisat)
+                const batasHari = new Date(tahunPenuh, blnAngka, 0).getDate();
+                if (tgl < 1 || tgl > batasHari || isNaN(tgl)) {
+                    isValidDate = false;
+                }
+            }
+
+            // Output Final
+            let teksTTL = "Tidak ditemukan";
+            let teksGender = "Tidak ditemukan"; // Jika tanggal tidak valid, gender juga tidak valid
+
+            if (isValidDate) {
+                const namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                teksTTL = `${tgl.toString().padStart(2, '0')} ${namaBulan[blnAngka - 1]} ${tahunPenuh}`;
+                teksGender = gender;
+            }
 
             document.getElementById('resProvinsi').innerText = provinsi;
             document.getElementById('resKabupaten').innerText = kabupaten;
             document.getElementById('resKecamatan').innerText = kecamatan;
-            document.getElementById('resGender').innerText = gender;
-            document.getElementById('resTTL').innerText = `${tgl.toString().padStart(2, '0')} ${teksBulan} ${tahunPenuh}`;
+            document.getElementById('resGender').innerText = teksGender;
+            document.getElementById('resTTL').innerText = teksTTL;
 
             resultCard.style.display = 'block';
         }

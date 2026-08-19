@@ -79,8 +79,8 @@
         .btn-link:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
 
         /* Fitur Copy Tempat Lahir */
-        .copyable { cursor: pointer; color: var(--primary); border-bottom: 1px dashed var(--primary); transition: var(--transition); display: inline-block;}
-        .copyable:hover { color: var(--primary-hover); border-bottom-color: var(--primary-hover); }
+        .copyable { cursor: pointer; color: var(--text-main); border-bottom: 1px dashed var(--text-main); transition: var(--transition); display: inline-block;}
+        .copyable:hover { color: #ff96da; border-bottom-color: #ff96da; }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         #icon-sun { display: none; }
@@ -209,7 +209,7 @@
             navigator.clipboard.writeText(text).then(() => {
                 const originalText = el.innerText;
                 el.innerText = "Tersalin!";
-                el.style.color = "#10b981"; // Warna hijau saat tersalin
+                el.style.color = "#60d673"; // Warna hijau saat tersalin
                 el.style.borderBottomColor = "transparent";
                 
                 setTimeout(() => {

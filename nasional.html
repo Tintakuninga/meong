@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengecek NIK Nasional</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --bg-color: #f3f4f6; --card-bg: #ffffff; --text-main: #1f2937;
+            --text-muted: #6b7280; --primary: #2563eb; --primary-hover: #1d4ed8;
+            --border-color: #e5e7eb; --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        [data-theme="dark"] {
+            --bg-color: #111827; --card-bg: #1f2937; --text-main: #f9fafb;
+            --text-muted: #9ca3af; --primary: #3b82f6; --primary-hover: #60a5fa;
+            --border-color: #374151; --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; transition: var(--transition); }
+        
+        .header-actions { position: absolute; top: 20px; right: 20px; }
+        .theme-toggle { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; box-shadow: var(--shadow); transition: var(--transition); }
+        .theme-toggle:hover { transform: scale(1.05); }
+        .theme-toggle svg { width: 24px; height: 24px; }
+
+        .container { background-color: var(--card-bg); padding: 40px 30px; border-radius: 16px; box-shadow: var(--shadow); width: 100%; max-width: 450px; border: 1px solid var(--border-color); transition: var(--transition); }
+        h2 { text-align: center; font-weight: 700; margin-bottom: 8px; }
+        p.subtitle { text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 5px; }
+        .badge-national { display: inline-block; background-color: #dbeafe; color: #1e40af; font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: 600; margin: 0 auto 25px auto; text-align: center; width: 100%; letter-spacing: 0.5px;}
+        [data-theme="dark"] .badge-national { background-color: #1e3a8a; color: #bfdbfe; }
+
+        .input-group { position: relative; margin-bottom: 20px; }
+        input { width: 100%; padding: 14px 40px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 16px; background-color: var(--bg-color); color: var(--text-main); text-align: center; font-weight: 600; letter-spacing: 2px; transition: var(--transition);}
+        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        
+        .btn-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; display: none; padding: 5px; border-radius: 50%; transition: var(--transition); }
+        .btn-clear:hover { color: #ef4444; background-color: rgba(239, 68, 68, 0.1); }
+        .btn-clear svg { width: 20px; height: 20px; }
+
+        button.btn-submit { width: 100%; background-color: var(--primary); color: white; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: var(--transition); }
+        button.btn-submit:hover:not(:disabled) { background-color: var(--primary-hover); }
+        button.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .result-card { margin-top: 25px; padding: 20px; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; display: none; animation: fadeIn 0.4s ease-in-out; }
+        .result-item { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--border-color); }
+        .result-item:last-child { border: none; padding: 0; margin: 0;}
+        .result-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; }
+        .result-value { font-size: 1rem; font-weight: 600; }
+        
+        .error-msg { text-align: center; font-size: 0.95rem; margin-top: 15px; color: #ef4444; display: none; padding: 10px; }
+        .status-loading { text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 8px; }
+        
+        .btn-back { display: block; text-align: center; margin-top: 20px; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: var(--transition); }
+        .btn-back:hover { color: var(--primary); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        #icon-sun { display: none; }
+        #icon-moon { display: block; }
+        [data-theme="dark"] #icon-sun { display: block; fill: currentColor;}
+        [data-theme="dark"] #icon-moon { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="header-actions">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Dark Mode">
+            <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        </button>
+    </div>
+
+    <div class="container">
+        <h2>Validasi Nasional</h2>
+        <p class="subtitle">Pencarian Database Wilayah Indonesia</p>
+        <div class="badge-national">Database JSON Nasional</div>
+        
+        <div class="input-group">
+            <input type="text" id="nikInput" placeholder="Masukkan 16 Digit NIK" oninput="formatInput(this)">
+            <button class="btn-clear" id="btnClear" onclick="clearInput()" title="Hapus NIK">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        
+        <button class="btn-submit" id="btnSubmit" onclick="cekNIK()" disabled>Memuat Database...</button>
+        <div class="status-loading" id="statusDb">Mempersiapkan data wilayah...</div>
+        <div class="error-msg" id="errorMsg"></div>
+
+        <div class="result-card" id="resultCard">
+            <div class="result-item">
+                <div class="result-label">Provinsi</div>
+                <div class="result-value" id="resProvinsi">-</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Kabupaten / Kota</div>
+                <div class="result-value" id="resKabupaten">-</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Kecamatan</div>
+                <div class="result-value" id="resKecamatan">-</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Jenis Kelamin</div>
+                <div class="result-value" id="resGender">-</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Tanggal Lahir</div>
+                <div class="result-value" id="resTTL">-</div>
+            </div>
+        </div>
+
+        <a href="index.html" class="btn-back">← Kembali ke Pengecek Sulsel</a>
+    </div>
+
+    <script>
+        // Fitur Tema (Sama dengan index.html)
+        function toggleTheme() {
+            const htmlNode = document.documentElement;
+            const currentTheme = htmlNode.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            htmlNode.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        window.onload = () => {
+            const savedTheme = localStorage.getItem('theme');
+            if(savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        };
+
+        // Fetch Data JSON
+        let dbWilayah = {};
+        window.addEventListener('DOMContentLoaded', () => {
+            fetch('data-wilayah.json')
+                .then(response => {
+                    if (!response.ok) throw new Error("Gagal mengambil file JSON");
+                    return response.json();
+                })
+                .then(data => {
+                    dbWilayah = data;
+                    document.getElementById('btnSubmit').disabled = false;
+                    document.getElementById('btnSubmit').innerText = 'Analisis Data';
+                    document.getElementById('statusDb').innerText = 'Database siap digunakan';
+                })
+                .catch(err => {
+                    document.getElementById('statusDb').innerText = 'Gagal memuat data-wilayah.json (Pastikan file berada di folder yang sama)';
+                    document.getElementById('statusDb').style.color = '#ef4444';
+                    console.error(err);
+                });
+        });
+
+        // Fitur Input dan Clear (Sama dengan index.html)
+        function formatInput(el) {
+            let val = el.value.replace(/\D/g, '');
+            el.value = val.substring(0, 16);
+            document.getElementById('btnClear').style.display = el.value.length > 0 ? 'block' : 'none';
+        }
+
+        function clearInput() {
+            const input = document.getElementById('nikInput');
+            input.value = '';
+            document.getElementById('btnClear').style.display = 'none';
+            document.getElementById('resultCard').style.display = 'none';
+            document.getElementById('errorMsg').style.display = 'none';
+            input.focus();
+        }
+
+        function cekNIK() {
+            const nik = document.getElementById('nikInput').value;
+            const resultCard = document.getElementById('resultCard');
+            const errorMsg = document.getElementById('errorMsg');
+            
+            resultCard.style.display = 'none';
+            errorMsg.style.display = 'none';
+
+            if(!/^\d{16}$/.test(nik)) {
+                errorMsg.innerText = "Mohon masukkan tepat 16 digit NIK (Hanya Angka).";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            const kodeWilayah = nik.substring(0, 6); // Ambil 6 digit pertama
+            let tgl = parseInt(nik.substring(6, 8));
+            const bln = nik.substring(8, 10);
+            const thn = parseInt(nik.substring(10, 12));
+
+            // Cek Data Wilayah di JSON
+            const dataLokasi = dbWilayah[kodeWilayah];
+
+            if (!dataLokasi) {
+                errorMsg.innerText = "Kode Wilayah (" + kodeWilayah + ") tidak ditemukan dalam database.";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // dataLokasi[0] = Provinsi, dataLokasi[1] = Kabupaten, dataLokasi[2] = Kecamatan
+            const provinsi = dataLokasi[0];
+            const kabupaten = dataLokasi[1];
+            const kecamatan = dataLokasi[2];
+
+            let gender = 'Laki-laki';
+            if (tgl > 40) {
+                gender = 'Perempuan';
+                tgl = tgl - 40;
+            }
+
+            const tahunSekarang = new Date().getFullYear() % 100;
+            let tahunPenuh = (thn <= tahunSekarang) ? 2000 + thn : 1900 + thn;
+
+            const namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const indexBulan = parseInt(bln) - 1;
+            const teksBulan = (indexBulan >= 0 && indexBulan <= 11) ? namaBulan[indexBulan] : bln;
+
+            document.getElementById('resProvinsi').innerText = provinsi;
+            document.getElementById('resKabupaten').innerText = kabupaten;
+            document.getElementById('resKecamatan').innerText = kecamatan;
+            document.getElementById('resGender').innerText = gender;
+            document.getElementById('resTTL').innerText = `${tgl.toString().padStart(2, '0')} ${teksBulan} ${tahunPenuh}`;
+
+            resultCard.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

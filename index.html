@@ -46,12 +46,20 @@
         [data-theme="dark"] .badge-regional { background-color: #4c1d95; color: #ddd6fe; }
 
         .input-group { position: relative; margin-bottom: 20px; }
-        input { width: 100%; padding: 14px 40px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 16px; background-color: var(--bg-color); color: var(--text-main); transition: var(--transition); letter-spacing: 2px; text-align: center; font-weight: 600; }
+        input { width: 100%; padding: 14px 45px 14px 20px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 16px; background-color: var(--bg-color); color: var(--text-main); transition: var(--transition); letter-spacing: 2px; text-align: center; font-weight: 600; }
         input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2); }
         
-        .btn-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; display: none; padding: 5px; border-radius: 50%; transition: var(--transition); }
-        .btn-clear:hover { color: #ef4444; background-color: rgba(239, 68, 68, 0.1); }
-        .btn-clear svg { width: 20px; height: 20px; }
+        /* Desain Umum Tombol di dalam Input */
+        .btn-action { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 50%; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
+        .btn-action svg { width: 20px; height: 20px; }
+        
+        /* Tombol Paste */
+        #btnPaste { display: flex; }
+        #btnPaste:hover { color: var(--primary); background-color: rgba(139, 92, 246, 0.1); }
+        
+        /* Tombol Clear / Hapus */
+        #btnClear { display: none; }
+        #btnClear:hover { color: #ef4444; background-color: rgba(239, 68, 68, 0.1); }
 
         button.btn-submit { width: 100%; background-color: var(--primary); color: white; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: var(--transition); }
         button.btn-submit:hover { background-color: var(--primary-hover); }
@@ -97,7 +105,14 @@
         
         <div class="input-group">
             <input type="text" id="nikInput" placeholder="Masukkan 16 Digit NIK" oninput="formatInput(this)">
-            <button class="btn-clear" id="btnClear" onclick="clearInput()" title="Hapus NIK">
+            
+            <!-- Tombol Paste -->
+            <button class="btn-action" id="btnPaste" onclick="pasteNIK()" title="Tempel NIK dari Clipboard">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+            </button>
+            
+            <!-- Tombol Clear -->
+            <button class="btn-action" id="btnClear" onclick="clearInput()" title="Hapus NIK">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </div>
@@ -152,16 +167,41 @@
         function formatInput(el) {
             let val = el.value.replace(/\D/g, '');
             el.value = val.substring(0, 16);
-            document.getElementById('btnClear').style.display = el.value.length > 0 ? 'block' : 'none';
+            
+            // Toggle tombol Clear dan Paste
+            if (el.value.length > 0) {
+                document.getElementById('btnClear').style.display = 'flex';
+                document.getElementById('btnPaste').style.display = 'none';
+            } else {
+                document.getElementById('btnClear').style.display = 'none';
+                document.getElementById('btnPaste').style.display = 'flex';
+            }
         }
 
         function clearInput() {
             const input = document.getElementById('nikInput');
             input.value = '';
-            document.getElementById('btnClear').style.display = 'none';
+            formatInput(input);
             document.getElementById('resultCard').style.display = 'none';
             document.getElementById('errorMsg').style.display = 'none';
             input.focus();
+        }
+        
+        // Fungsi Paste Otomatis
+        async function pasteNIK() {
+            try {
+                const text = await navigator.clipboard.readText();
+                const input = document.getElementById('nikInput');
+                input.value = text;
+                formatInput(input);
+                
+                if (input.value.length === 16) {
+                    cekNIK();
+                }
+            } catch (err) {
+                alert("Gagal mengakses Clipboard. Silakan paste manual.");
+                console.error("Error paste: ", err);
+            }
         }
 
         // Fungsi Salin Tempat Lahir

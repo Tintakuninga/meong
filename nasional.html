@@ -35,12 +35,20 @@
         [data-theme="dark"] .badge-national { background-color: #1e3a8a; color: #bfdbfe; }
 
         .input-group { position: relative; margin-bottom: 20px; }
-        input { width: 100%; padding: 14px 40px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 16px; background-color: var(--bg-color); color: var(--text-main); text-align: center; font-weight: 600; letter-spacing: 2px; transition: var(--transition);}
+        input { width: 100%; padding: 14px 45px 14px 20px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 16px; background-color: var(--bg-color); color: var(--text-main); text-align: center; font-weight: 600; letter-spacing: 2px; transition: var(--transition);}
         input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
         
-        .btn-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; display: none; padding: 5px; border-radius: 50%; transition: var(--transition); }
-        .btn-clear:hover { color: #ef4444; background-color: rgba(239, 68, 68, 0.1); }
-        .btn-clear svg { width: 20px; height: 20px; }
+        /* Desain Umum Tombol di dalam Input */
+        .btn-action { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 50%; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
+        .btn-action svg { width: 20px; height: 20px; }
+        
+        /* Tombol Paste */
+        #btnPaste { display: flex; }
+        #btnPaste:hover { color: var(--primary); background-color: rgba(37, 99, 235, 0.1); }
+        
+        /* Tombol Clear / Hapus */
+        #btnClear { display: none; }
+        #btnClear:hover { color: #ef4444; background-color: rgba(239, 68, 68, 0.1); }
 
         button.btn-submit { width: 100%; background-color: var(--primary); color: white; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: var(--transition); }
         button.btn-submit:hover:not(:disabled) { background-color: var(--primary-hover); }
@@ -81,7 +89,14 @@
         
         <div class="input-group">
             <input type="text" id="nikInput" placeholder="Masukkan 16 Digit NIK" oninput="formatInput(this)">
-            <button class="btn-clear" id="btnClear" onclick="clearInput()" title="Hapus NIK">
+            
+            <!-- Tombol Paste (Muncul saat kosong) -->
+            <button class="btn-action" id="btnPaste" onclick="pasteNIK()" title="Tempel NIK dari Clipboard">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+            </button>
+            
+            <!-- Tombol Clear (Muncul saat ada isi) -->
+            <button class="btn-action" id="btnClear" onclick="clearInput()" title="Hapus NIK">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </div>
@@ -117,7 +132,7 @@
     </div>
 
     <script>
-        // Fitur Tema (Sama dengan index.html)
+        // Fitur Tema
         function toggleTheme() {
             const htmlNode = document.documentElement;
             const currentTheme = htmlNode.getAttribute('data-theme');
@@ -150,26 +165,54 @@
                     document.getElementById('statusDb').innerText = 'Database siap digunakan';
                 })
                 .catch(err => {
-                    document.getElementById('statusDb').innerText = 'Gagal memuat data-wilayah.json (Pastikan file berada di folder yang sama)';
+                    document.getElementById('statusDb').innerText = 'Gagal memuat data-wilayah.json';
                     document.getElementById('statusDb').style.color = '#ef4444';
                     console.error(err);
                 });
         });
 
-        // Fitur Input dan Clear (Sama dengan index.html)
+        // Fitur Format Input & Toggle Ikon
         function formatInput(el) {
-            let val = el.value.replace(/\D/g, '');
-            el.value = val.substring(0, 16);
-            document.getElementById('btnClear').style.display = el.value.length > 0 ? 'block' : 'none';
+            let val = el.value.replace(/\D/g, ''); // Buang selain angka
+            el.value = val.substring(0, 16); // Batasi 16 digit
+            
+            // Logika sembunyikan/tampilkan tombol
+            if (el.value.length > 0) {
+                document.getElementById('btnClear').style.display = 'flex';
+                document.getElementById('btnPaste').style.display = 'none';
+            } else {
+                document.getElementById('btnClear').style.display = 'none';
+                document.getElementById('btnPaste').style.display = 'flex';
+            }
         }
 
+        // Fitur Hapus Input
         function clearInput() {
             const input = document.getElementById('nikInput');
             input.value = '';
-            document.getElementById('btnClear').style.display = 'none';
+            formatInput(input); // Panggil fungsi format agar ikon kembali ke Paste
             document.getElementById('resultCard').style.display = 'none';
             document.getElementById('errorMsg').style.display = 'none';
             input.focus();
+        }
+
+        // Fitur Paste Otomatis dari Clipboard
+        async function pasteNIK() {
+            try {
+                // Membaca teks yang sedang di-copy pengguna
+                const text = await navigator.clipboard.readText();
+                const input = document.getElementById('nikInput');
+                input.value = text;
+                formatInput(input); // Panggil fungsi format agar ikon X muncul
+                
+                // Opsional: Otomatis klik "Analisis Data" setelah di-paste
+                if (input.value.length === 16) {
+                    cekNIK();
+                }
+            } catch (err) {
+                alert("Browser Anda belum mengizinkan akses Clipboard (Tempel otomatis). Silakan tempel secara manual.");
+                console.error("Gagal membaca clipboard: ", err);
+            }
         }
 
         function cekNIK() {
@@ -186,7 +229,7 @@
                 return;
             }
 
-            const kodeWilayah = nik.substring(0, 6); // Ambil 6 digit pertama
+            const kodeWilayah = nik.substring(0, 6);
             let tgl = parseInt(nik.substring(6, 8));
             const bln = nik.substring(8, 10);
             const thn = parseInt(nik.substring(10, 12));
@@ -200,19 +243,16 @@
                 return;
             }
 
-            // dataLokasi[0] = Provinsi, dataLokasi[1] = Kabupaten, dataLokasi[2] = Kecamatan
             const provinsi = dataLokasi[0];
             const kabupaten = dataLokasi[1];
             const kecamatan = dataLokasi[2];
 
-            // Logika Jenis Kelamin
             let gender = 'Laki-laki';
             if (tgl > 40) {
                 gender = 'Perempuan';
                 tgl = tgl - 40;
             }
 
-            // Logika Tahun
             const tahunSekarang = new Date().getFullYear() % 100;
             let tahunPenuh = (thn <= tahunSekarang) ? 2000 + thn : 1900 + thn;
 
@@ -223,16 +263,14 @@
             if (blnAngka < 1 || blnAngka > 12 || isNaN(blnAngka)) {
                 isValidDate = false;
             } else {
-                // Mengecek batas hari dalam bulan tersebut (termasuk tahun kabisat)
                 const batasHari = new Date(tahunPenuh, blnAngka, 0).getDate();
                 if (tgl < 1 || tgl > batasHari || isNaN(tgl)) {
                     isValidDate = false;
                 }
             }
 
-            // Output Final
             let teksTTL = "Tidak ditemukan";
-            let teksGender = "Tidak ditemukan"; // Jika tanggal tidak valid, gender juga tidak valid
+            let teksGender = "Tidak ditemukan";
 
             if (isValidDate) {
                 const namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];

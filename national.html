@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengecek NIK Nasional</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        /* CSS di sini sama persis dengan index.html untuk menjaga konsistensi desain */
+        :root {
+            --bg-color: #f3f4f6; --card-bg: #ffffff; --text-main: #1f2937;
+            --text-muted: #6b7280; --primary: #3b82f6; /* Warna biru untuk pembeda dengan halaman Sulsel */
+            --primary-hover: #2563eb; --border-color: #e5e7eb;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); --transition: all 0.3s ease;
+        }
+        [data-theme="dark"] {
+            --bg-color: #111827; --card-bg: #1f2937; --text-main: #f9fafb;
+            --text-muted: #9ca3af; --primary: #3b82f6; --primary-hover: #60a5fa;
+            --border-color: #374151; --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; transition: var(--transition); }
+        
+        .container { background-color: var(--card-bg); padding: 40px 30px; border-radius: 16px; box-shadow: var(--shadow); width: 100%; max-width: 450px; border: 1px solid var(--border-color); }
+        h2 { text-align: center; font-weight: 700; margin-bottom: 8px; }
+        p.subtitle { text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 5px; }
+        .badge-national { display: inline-block; background-color: #dbeafe; color: #1e40af; font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: 600; margin: 0 auto 25px auto; text-align: center; width: 100%; letter-spacing: 0.5px;}
+        [data-theme="dark"] .badge-national { background-color: #1e3a8a; color: #bfdbfe; }
+
+        .input-group { position: relative; margin-bottom: 20px; }
+        input { width: 100%; padding: 14px 40px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 16px; background-color: var(--bg-color); color: var(--text-main); text-align: center; font-weight: 600; letter-spacing: 2px;}
+        input:focus { outline: none; border-color: var(--primary); }
+        
+        button.btn-submit { width: 100%; background-color: var(--primary); color: white; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: var(--transition); }
+        button.btn-submit:hover { background-color: var(--primary-hover); }
+        
+        .result-card { margin-top: 25px; padding: 20px; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; display: none; }
+        .result-item { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--border-color); }
+        .result-item:last-child { border: none; padding: 0; margin: 0;}
+        .result-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; }
+        .result-value { font-size: 1rem; font-weight: 600; }
+        .error-msg { text-align: center; font-size: 0.95rem; margin-top: 15px; color: #ef4444; display: none; }
+        .btn-back { display: block; text-align: center; margin-top: 20px; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+        .btn-back:hover { color: var(--text-main); text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Validasi Nasional</h2>
+        <p class="subtitle">Ekstraksi Data Dasar Kependudukan</p>
+        <div class="badge-national">Regional: Seluruh Indonesia</div>
+        
+        <div class="input-group">
+            <input type="text" id="nikInput" placeholder="Masukkan 16 Digit NIK" oninput="formatInput(this)">
+        </div>
+        
+        <button class="btn-submit" onclick="cekNIK()">Analisis Data</button>
+        <div class="error-msg" id="errorMsg"></div>
+
+        <div class="result-card" id="resultCard">
+            <div class="result-item">
+                <div class="result-label">Provinsi</div>
+                <div class="result-value" id="resProvinsi">-</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Kode Wilayah (Kab/Kec)</div>
+                <div class="result-value" id="resKode">-</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Jenis Kelamin</div>
+                <div class="result-value" id="resGender">-</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Tanggal Lahir</div>
+                <div class="result-value" id="resTTL">-</div>
+            </div>
+        </div>
+
+        <a href="index.html" class="btn-back">← Kembali ke Pengecek Sulsel</a>
+    </div>
+
+    <script>
+        function formatInput(el) {
+            el.value = el.value.replace(/\D/g, '').substring(0, 16);
+        }
+
+        // Database 38 Provinsi Indonesia
+        const dbProvinsi = {
+            "11": "ACEH", "12": "SUMATERA UTARA", "13": "SUMATERA BARAT", "14": "RIAU", "15": "JAMBI",
+            "16": "SUMATERA SELATAN", "17": "BENGKULU", "18": "LAMPUNG", "19": "KEPULAUAN BANGKA BELITUNG", "21": "KEPULAUAN RIAU",
+            "31": "DKI JAKARTA", "32": "JAWA BARAT", "33": "JAWA TENGAH", "34": "DI YOGYAKARTA", "35": "JAWA TIMUR", "36": "BANTEN",
+            "51": "BALI", "52": "NUSA TENGGARA BARAT", "53": "NUSA TENGGARA TIMUR",
+            "61": "KALIMANTAN BARAT", "62": "KALIMANTAN TENGAH", "63": "KALIMANTAN SELATAN", "64": "KALIMANTAN TIMUR", "65": "KALIMANTAN UTARA",
+            "71": "SULAWESI UTARA", "72": "SULAWESI TENGAH", "73": "SULAWESI SELATAN", "74": "SULAWESI TENGGARA", "75": "GORONTALO", "76": "SULAWESI BARAT",
+            "81": "MALUKU", "82": "MALUKU UTARA",
+            "91": "PAPUA", "92": "PAPUA BARAT", "93": "PAPUA SELATAN", "94": "PAPUA TENGAH", "95": "PAPUA PEGUNUNGAN", "96": "PAPUA BARAT DAYA"
+        };
+
+        function cekNIK() {
+            const nik = document.getElementById('nikInput').value;
+            const resultCard = document.getElementById('resultCard');
+            const errorMsg = document.getElementById('errorMsg');
+            
+            resultCard.style.display = 'none';
+            errorMsg.style.display = 'none';
+
+            if(!/^\d{16}$/.test(nik)) {
+                errorMsg.innerText = "Mohon masukkan tepat 16 digit NIK.";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            const kodeProv = nik.substring(0, 2);
+            const kodeKab = nik.substring(2, 4);
+            const kodeKec = nik.substring(4, 6);
+            let tgl = parseInt(nik.substring(6, 8));
+            const bln = nik.substring(8, 10);
+            const thn = parseInt(nik.substring(10, 12));
+
+            // Ekstraksi Provinsi
+            const namaProvinsi = dbProvinsi[kodeProv] || "Kode Provinsi Tidak Valid";
+
+            // Ekstraksi Gender & Tanggal Lahir
+            let gender = 'Laki-laki';
+            if (tgl > 40) {
+                gender = 'Perempuan';
+                tgl = tgl - 40;
+            }
+
+            const tahunSekarang = new Date().getFullYear() % 100;
+            let tahunPenuh = (thn <= tahunSekarang) ? 2000 + thn : 1900 + thn;
+
+            const namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const indexBulan = parseInt(bln) - 1;
+            const teksBulan = (indexBulan >= 0 && indexBulan <= 11) ? namaBulan[indexBulan] : bln;
+
+            document.getElementById('resProvinsi').innerText = namaProvinsi;
+            document.getElementById('resKode').innerText = `Kab/Kota: ${kodeKab} | Kec: ${kodeKec}`;
+            document.getElementById('resGender').innerText = gender;
+            document.getElementById('resTTL').innerText = `${tgl.toString().padStart(2, '0')} ${teksBulan} ${tahunPenuh}`;
+
+            resultCard.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

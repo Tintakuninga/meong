@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Konverter Wilayah ke JSON</title>
+    <style>
+        body { font-family: sans-serif; padding: 40px; text-align: center; background: #f4f4f9; }
+        .card { background: white; max-width: 500px; margin: 0 auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        button { background: #2563eb; color: white; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 20px; }
+        button:hover { background: #1d4ed8; }
+        #status { margin-top: 15px; color: #059669; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Konverter Data NIK ke JSON</h2>
+        <p>Proses penggabungan data relasional menjadi format ringkas 1-step lookup.</p>
+        <button onclick="prosesDanUnduh()">Konversi & Unduh data-wilayah.json</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        // Paste/tempelkan array data dari Zaki di bawah ini:
+        const PROVINSI = [
+            { idProv: "11", name: "ACEH" },
+            { idProv: "31", name: "DKI JAKARTA" },
+            { idProv: "73", name: "SULAWESI SELATAN" }
+        ];
+
+        const KABUPATEN = [
+            { idKab: "1101", idProv: "11", name: "KAB. ACEH SELATAN" },
+            { idKab: "3171", idProv: "31", name: "KOTA ADM. JAKARTA SELATAN" },
+            { idKab: "7371", idProv: "73", name: "KOTA MAKASSAR" }
+        ];
+
+        const KECAMATAN = [
+            { idKec: "110101", idKab: "1101", name: "Bakongan" },
+            { idKec: "110102", idKab: "1101", name: "Kluet Utara" },
+            { idKec: "317101", idKab: "3171", name: "Tebet" },
+            { idKec: "737101", idKab: "7371", name: "Mariso" }
+        ];
+
+        function prosesDanUnduh() {
+            document.getElementById('status').innerText = "Memproses data...";
+
+            // 1. Buat Peta Lookup Provinsi
+            const mapProv = {};
+            PROVINSI.forEach(p => {
+                mapProv[p.idProv] = p.name;
+            });
+
+            // 2. Buat Peta Lookup Kabupaten
+            const mapKab = {};
+            KABUPATEN.forEach(k => {
+                mapKab[k.idKab] = {
+                    name: k.name,
+                    idProv: k.idProv
+                };
+            });
+
+            // 3. Gabungkan ke Format Ringkas { "6_DIGIT": ["PROV", "KAB", "KEC"] }
+            const hasilJSON = {};
+
+            KECAMATAN.forEach(kec => {
+                const kab = mapKab[kec.idKab] || { name: "TIDAK DIKETAHUI", idProv: "" };
+                const provName = mapProv[kab.idProv] || "TIDAK DIKETAHUI";
+
+                hasilJSON[kec.idKec] = [
+                    provName,
+                    kab.name,
+                    kec.name.toUpperCase()
+                ];
+            });
+
+            // 4. Unduh Otomatis File JSON
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(hasilJSON));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "data-wilayah.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+
+            document.getElementById('status').innerText = "Selesai! File data-wilayah.json berhasil diunduh.";
+        }
+    </script>
+</body>
+</html>

@@ -49,7 +49,6 @@
         input { width: 100%; padding: 14px 40px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 16px; background-color: var(--bg-color); color: var(--text-main); transition: var(--transition); letter-spacing: 2px; text-align: center; font-weight: 600; }
         input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2); }
         
-        /* Tombol Clear (X) */
         .btn-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; display: none; padding: 5px; border-radius: 50%; transition: var(--transition); }
         .btn-clear:hover { color: #ef4444; background-color: rgba(239, 68, 68, 0.1); }
         .btn-clear svg { width: 20px; height: 20px; }
@@ -62,7 +61,18 @@
         .result-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
         .result-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
         .result-value { font-size: 1rem; font-weight: 600; color: var(--text-main); }
-        .error-msg { color: #ef4444; text-align: center; font-size: 0.9rem; margin-top: 10px; display: none; }
+        
+        /* Modifikasi Notifikasi Error & Link ke Page 2 */
+        .error-msg { text-align: center; font-size: 0.95rem; margin-top: 15px; display: none; padding: 10px; border-radius: 8px;}
+        .error-msg.invalid { color: #ef4444; }
+        .error-msg.redirect { color: var(--text-main); background-color: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); }
+        
+        .btn-link { display: inline-block; margin-top: 10px; padding: 10px 20px; background-color: var(--primary); color: white !important; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; transition: var(--transition); }
+        .btn-link:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
+
+        /* Fitur Copy Tempat Lahir */
+        .copyable { cursor: pointer; color: var(--primary); border-bottom: 1px dashed var(--primary); transition: var(--transition); display: inline-block;}
+        .copyable:hover { color: var(--primary-hover); border-bottom-color: var(--primary-hover); }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         #icon-sun { display: none; }
@@ -86,17 +96,16 @@
         <div class="badge-regional">Regional: Khusus Sulawesi Selatan</div>
         
         <div class="input-group">
-            <!-- maxlength dihapus agar copy-paste angka berspasi tidak terpotong prematurely -->
             <input type="text" id="nikInput" placeholder="Masukkan 16 Digit NIK" oninput="formatInput(this)">
-            
-            <!-- Tombol X -->
             <button class="btn-clear" id="btnClear" onclick="clearInput()" title="Hapus NIK">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </div>
         
         <button class="btn-submit" onclick="cekNIK()">Analisis Data</button>
-        <div class="error-msg" id="errorMsg">Mohon masukkan tepat 16 digit NIK (Hanya Angka).</div>
+        
+        <!-- Pesan Error / Redirect -->
+        <div class="error-msg" id="errorMsg"></div>
 
         <div class="result-card" id="resultCard">
             <div class="result-item">
@@ -140,25 +149,37 @@
             }
         };
 
-        // Format Input & Tampilkan Tombol X
         function formatInput(el) {
-            // Hilangkan semua karakter selain angka (termasuk spasi)
             let val = el.value.replace(/\D/g, '');
-            // Potong menjadi maksimal 16 digit
             el.value = val.substring(0, 16);
-            
-            // Tampilkan tombol X jika ada teks, sembunyikan jika kosong
             document.getElementById('btnClear').style.display = el.value.length > 0 ? 'block' : 'none';
         }
 
-        // Fungsi Hapus Input (Tombol X)
         function clearInput() {
             const input = document.getElementById('nikInput');
             input.value = '';
             document.getElementById('btnClear').style.display = 'none';
             document.getElementById('resultCard').style.display = 'none';
             document.getElementById('errorMsg').style.display = 'none';
-            input.focus(); // Kembalikan kursor ke input
+            input.focus();
+        }
+
+        // Fungsi Salin Tempat Lahir
+        function copyTempatLahir(text, el) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = el.innerText;
+                el.innerText = "Tersalin!";
+                el.style.color = "#10b981"; // Warna hijau saat tersalin
+                el.style.borderBottomColor = "transparent";
+                
+                setTimeout(() => {
+                    el.innerText = originalText;
+                    el.style.color = "";
+                    el.style.borderBottomColor = "";
+                }, 1500);
+            }).catch(err => {
+                console.error('Gagal menyalin teks: ', err);
+            });
         }
 
         const dbSulsel = {
@@ -195,9 +216,11 @@
             
             resultCard.style.display = 'none';
             errorMsg.style.display = 'none';
+            errorMsg.className = 'error-msg'; // Reset class
 
-            // VALIDASI INPUT: Harus 16 digit angka (Spasi sudah dihilangkan oleh formatInput)
             if(!/^\d{16}$/.test(nik)) {
+                errorMsg.innerText = "Mohon masukkan tepat 16 digit NIK (Hanya Angka).";
+                errorMsg.classList.add('invalid');
                 errorMsg.style.display = 'block';
                 return;
             }
@@ -210,8 +233,11 @@
             const bulanLahir = nik.substring(8, 10);
             const tahunLahir = parseInt(nik.substring(10, 12));
 
+            // Jika bukan Sulsel, arahkan ke Page 2 (nasional.html)
             if (kodeProv !== "73") {
-                errorMsg.innerText = "Alat ini khusus untuk NIK Provinsi Sulawesi Selatan (Awalan 73).";
+                errorMsg.innerHTML = `Mendeteksi NIK dari luar Sulawesi Selatan.<br>
+                <a href="nasional.html" class="btn-link">Buka Pengecek NIK Nasional</a>`;
+                errorMsg.classList.add('redirect');
                 errorMsg.style.display = 'block';
                 return;
             }
@@ -239,7 +265,6 @@
             const tahunSekarang = new Date().getFullYear() % 100;
             let tahunPenuh = (tahunLahir <= tahunSekarang) ? 2000 + tahunLahir : 1900 + tahunLahir;
 
-            // LOGIKA UJUNG PANDANG
             if (tempatLahir === "MAKASSAR") {
                 const tglLahirObj = new Date(tahunPenuh, parseInt(bulanLahir) - 1, tanggalLahir);
                 const batasUjungPandang = new Date(1999, 9, 13); 
@@ -252,12 +277,13 @@
             const formatTanggal = tanggalLahir.toString().padStart(2, '0');
             const formatBulan = getNamaBulan(bulanLahir);
 
-            // RENDER OUTPUT BERSIH (Tanpa tulisan "Kode: ...")
             document.getElementById('resProvinsi').innerText = `SULAWESI SELATAN`;
             document.getElementById('resKabupaten').innerText = namaKab;
             document.getElementById('resKecamatan').innerText = namaKec;
             document.getElementById('resGender').innerText = gender;
-            document.getElementById('resTTL').innerText = `${tempatLahir}, ${formatTanggal} ${formatBulan} ${tahunPenuh}`;
+            
+            // Render TTL dengan Elemen Tempat Lahir yang Bisa Di-Copy
+            document.getElementById('resTTL').innerHTML = `<span class="copyable" onclick="copyTempatLahir('${tempatLahir}', this)" title="Klik untuk menyalin Tempat Lahir">${tempatLahir}</span>, ${formatTanggal} ${formatBulan} ${tahunPenuh}`;
 
             resultCard.style.display = 'block';
         }
